@@ -1,0 +1,9 @@
+---
+- name: Installation
+  hosts:
+    - localhost
+  become: yes
+  become_user: root
+  roles:
+    - clamav
+    - nvidia

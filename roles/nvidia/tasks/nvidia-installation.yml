@@ -1,0 +1,36 @@
+- name: Update apt repo and cache on all Debian/Ubuntu boxes
+  apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: Upgrade all packages on servers
+  apt: upgrade=dist force_apt_get=yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: Upgrade the OS (apt-get dist-upgrade)
+  ansible.builtin.apt:
+    upgrade: dist
+
+- name: Install build-essential
+  apt: 
+      name: {{ item }} 
+      state: latest
+  with_items: 
+    - build-essential
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: Remove Nvidia driver package
+  ansible.builtin.apt:
+    name: nvidia-*
+    state: absent
+
+- name: Install Nvidia driver version 525
+  apt: 
+      name: {{ item }} 
+      state: latest
+  with_items: 
+    - nvidia-driver-525
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: Switch to nvidia GPU 
+  shell: prime-select nvidia
+  become: true

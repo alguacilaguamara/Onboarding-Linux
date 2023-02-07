@@ -1,0 +1,104 @@
+- name: Load epel repository
+  yum:
+    name: 
+      - epel-release
+    state: present
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: Install ClamAV
+  yum:
+    name:
+      - clamav-server
+      - clamav-data
+      - clamav-update
+      - clamav-filesystem
+      - clamav
+      - clamav-scanner-systemd 
+      - clamav-devel 
+      - clamav-lib 
+      - clamav-server-systemd
+    state: present
+    update_cache: True
+    disable_gpg_check: yes
+    conf_file: '/etc/yum.conf'
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: Update apt repo and cache on all Debian/Ubuntu boxes
+  apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: Upgrade all packages on servers
+  apt: upgrade=dist force_apt_get=yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: Install ClamAV and Timeshift
+  apt: 
+      name: {{ item }} 
+      state: latest
+  with_items: 
+    - clamav
+    - clamav-daemon
+    - timeshift
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- copy:
+    src: ../templates/clamav
+    dest: /etc/cron.d/clamav
+    owner: root
+    group: root
+    mode: 0600
+
+- copy:
+    src: ../templates/freshclam.conf
+    dest: /etc/freshclam.conf
+    owner: root
+    group: root
+    mode: 0600
+  
+- copy:
+    src: ../templates/clamav.sh
+    dest: /usr/local/bin/clamav.sh
+    owner: root
+    group: root
+    mode: 0777
+
+- name: Daily cron scanner
+  command: echo "15 14 * * 2 /usr/local/bin/clamav.sh" >> /var/spool/cron/root
+  become: true
+
+- name: Enable Clamav between scan.conf
+  ansible.builtin.replace:
+    path: /etc/clamd.d/scan.conf
+    regexp: "^#LocalSocket /run/clamd.scan/clamd.sock"
+    replace: "LocalSocket /run/clamd.scan/clamd.sock"
+  become: true
+
+- name: Perform virus definitions update
+  shell: freshclam
+  register: virus_def_update
+  changed_when: "'Downloading' in virus_def_update.stdout"
+
+- name: Install freshclam auto-update service
+  template:
+    src: freshclam.service.j2
+    dest: /usr/lib/systemd/system/freshclam.service
+  when: true
+
+- name: restart_freshclam
+  systemd:
+    name: freshclam
+    state: restarted
+    daemon_reload: yes
+
+- name: Start and enable freshclam auto-update service
+  systemd:
+    name: "freshclam"
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+- name: Start and enable ClamAV scanner service
+  systemd:
+    name: "clamd@scan"
+    state: started
+    enabled: yes
