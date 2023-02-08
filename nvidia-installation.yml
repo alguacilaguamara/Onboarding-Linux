@@ -1,0 +1,8 @@
+---
+- name: Installation of Nvidia propietary driver
+  hosts:
+    - localhost
+  become: yes
+  become_user: root
+  roles:
+    - nvidia
