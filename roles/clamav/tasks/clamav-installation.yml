@@ -31,14 +31,14 @@
   apt: upgrade=dist force_apt_get=yes
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
-- name: Install ClamAV and Timeshift
+- name: Install ClamAV and UFW Firewall
   apt: 
       name: {{ item }} 
       state: latest
   with_items: 
     - clamav
     - clamav-daemon
-    - timeshift
+    - ufw
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - copy:
@@ -84,6 +84,14 @@
     dest: /usr/lib/systemd/system/freshclam.service
   when: true
 
+- name: Allow outgoing connection
+  shell: ufw default allow outgoing
+  become: true
+
+- name: Deny incoming connection
+  shell: ufw default deny incoming
+  become: true
+
 - name: restart_freshclam
   systemd:
     name: freshclam
@@ -100,5 +108,11 @@
 - name: Start and enable ClamAV scanner service
   systemd:
     name: "clamd@scan"
+    state: started
+    enabled: yes
+
+- name: Start and enable ufw Firewall
+  systemd:
+    name: "ufw"
     state: started
     enabled: yes

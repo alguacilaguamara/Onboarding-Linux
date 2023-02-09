@@ -1,0 +1,3 @@
+Software installer in this pc:
+- ClamAV: This is the antivirus
+- ufw: This is the firewall. How to use https://www.cyberciti.biz/faq/how-to-setup-a-ufw-firewall-on-ubuntu-18-04-lts-server/
