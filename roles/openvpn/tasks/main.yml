@@ -1,0 +1,2 @@
+- name: Load OpenVPN config
+  import_tasks: load-vpn-config.yml
