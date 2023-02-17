@@ -1,0 +1,8 @@
+---
+- name: Installation of Timeshift and firts backup
+  hosts:
+    - localhost
+  become: yes
+  become_user: root
+  roles:
+    - timeshift

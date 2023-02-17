@@ -1,0 +1,8 @@
+---
+- name: Installation of Clamav
+  hosts:
+    - localhost
+  become: yes
+  become_user: root
+  roles:
+    - clamav

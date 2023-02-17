@@ -1,0 +1,10 @@
+---
+- name: Installation of ClamAV, Nvidia propietary driver and Timeshift for backup
+  hosts:
+    - localhost
+  become: yes
+  become_user: root
+  roles:
+    - clamav
+    - nvidia
+    - timeshift
