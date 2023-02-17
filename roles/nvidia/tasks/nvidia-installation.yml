@@ -12,23 +12,23 @@
 
 - name: Install build-essential
   apt: 
-      name: {{ item }} 
+      name:
+        - build-essential
       state: latest
-  with_items: 
-    - build-essential
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - name: Remove Nvidia driver package
   ansible.builtin.apt:
     name: nvidia-*
     state: absent
+  ignore_errors: true
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - name: Install Nvidia driver version 525
   apt: 
-      name: {{ item }} 
-      state: latest
-  with_items: 
-    - nvidia-driver-525
+      name:
+        - nvidia-driver-525
+      state: latest 
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - name: Switch to nvidia GPU 

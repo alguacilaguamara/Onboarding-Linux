@@ -33,20 +33,12 @@
 
 - name: Install ClamAV and UFW Firewall
   apt: 
-      name: {{ item }} 
+      name: 
+        - clamav
+        - clamav-daemon
+        - ufw
       state: latest
-  with_items: 
-    - clamav
-    - clamav-daemon
-    - ufw
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
-
-- copy:
-    src: ../templates/clamav
-    dest: /etc/cron.d/clamav
-    owner: root
-    group: root
-    mode: 0600
 
 - copy:
     src: ../templates/freshclam.conf
@@ -54,6 +46,7 @@
     owner: root
     group: root
     mode: 0600
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
   
 - copy:
     src: ../templates/clamav.sh
@@ -62,9 +55,17 @@
     group: root
     mode: 0777
 
-- name: Daily cron scanner
-  command: echo "15 14 * * 2 /usr/local/bin/clamav.sh" >> /var/spool/cron/root
-  become: true
+# - name: Daily cron scanner
+#   command: echo "15 14 * * 2 /usr/local/bin/clamav.sh" >> /var/spool/cron/root
+#   become: true
+#   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: Cron analisis the computer with ClamAV
+  ansible.builtin.cron:
+    name: "Analises computer with ClamAV "
+    minute: "15"
+    hour: "14"
+    job: "/usr/local/bin/clamav.sh"
 
 - name: Enable Clamav between scan.conf
   ansible.builtin.replace:
@@ -72,6 +73,14 @@
     regexp: "^#LocalSocket /run/clamd.scan/clamd.sock"
     replace: "LocalSocket /run/clamd.scan/clamd.sock"
   become: true
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: Stop freshclam auto-update service
+  systemd:
+    name: "clamav-freshclam"
+    state: stopped
+    daemon_reload: yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - name: Perform virus definitions update
   shell: freshclam
@@ -104,15 +113,26 @@
     state: started
     enabled: yes
     daemon_reload: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: Stop freshclam auto-update service
+  systemd:
+    name: "clamav-freshclam"
+    state: started
+    daemon_reload: yes
+    enabled: yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - name: Start and enable ClamAV scanner service
   systemd:
     name: "clamd@scan"
     state: started
     enabled: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
 - name: Start and enable ufw Firewall
   systemd:
     name: "ufw"
     state: started
     enabled: yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
