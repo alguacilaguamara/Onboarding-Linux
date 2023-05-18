@@ -1,9 +1,13 @@
+- name: Search user of machine
+  shell: ls /home
+  register: user_name
+
 - name: Remove route remote host in ovpn file
   ansible.builtin.replace:
-    path: /home/*/Documents/VPN/*.ovpn
+    path: /home/{{ user_name }}/Documents/VPN/*.ovpn
     regexp: "^#route remote_host 255.255.255.255 net_gateway"
     replace: " "
 
 - name: Load openvpn ovpn from ~/Documents/VPN
-  shell: nmcli connection import type openvpn file /home/*/Documents/VPN/*.ovpn
+  shell: nmcli connection import type openvpn file /home/{{ user_name }}/Documents/VPN/*.ovpn
   become: true
