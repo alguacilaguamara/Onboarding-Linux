@@ -1,6 +1,6 @@
 - name: Remove route remote host in ovpn file
   ansible.builtin.replace:
-    path: ~/Documents/VPN/*.ovpn
+    path: /home/*/Documents/VPN/*.ovpn
     regexp: "^#route remote_host 255.255.255.255 net_gateway"
     replace: " "
 
