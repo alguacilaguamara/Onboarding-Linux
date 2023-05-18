@@ -64,11 +64,8 @@
 #   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
 - name: Deleting ClamAV analisis crontab entry
-  become: true
-  tasks:
-   - name: "decroning entry"
-     shell:
-           "crontab -l -u root |grep -v /usr/local/bin/clamav.sh  |crontab -u root -"
+  shell:
+        "crontab -l -u root |grep -v /usr/local/bin/clamav.sh  |crontab -u root -"
 
 - name: Cron analisis the computer with ClamAV
   ansible.builtin.cron:
