@@ -2,12 +2,23 @@
   shell: ls /home
   register: user_name
 
+# - name: Search ovpn file to config VPN
+#   register: ovpn_file
+#   find:
+#     paths: /home/{{user_name.stdout}}
+#     patterns: "^.*?\\.(?:ovpn)$"
+#     use_regex: yes
+- name: Search ovpn file to config VPN
+  shell: "find /home/{{user_name.stdout}} | grep .ovpn"
+  register: ovpn_file
+
 - name: Remove route remote host in ovpn file
   ansible.builtin.replace:
-    path: /home/{{ user_name }}/Documents/VPN/*.ovpn
-    regexp: "^#route remote_host 255.255.255.255 net_gateway"
-    replace: " "
+    path: "{{ovpn_file.stdout}}"
+    regexp: 'route remote_host 255.255.255.255 net_gateway'
+    replace: ""
+  ignore_errors: true
 
 - name: Load openvpn ovpn from ~/Documents/VPN
-  shell: nmcli connection import type openvpn file /home/{{ user_name }}/Documents/VPN/*.ovpn
+  shell: "nmcli connection import type openvpn file {{ovpn_file.stdout}}"
   become: true
