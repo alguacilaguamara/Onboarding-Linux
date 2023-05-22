@@ -55,15 +55,23 @@
     group: root
     mode: 0777
 
+- name: Creates clamav log directory
+  file: path=/var/log/clamav state=directory
+
 # - name: Daily cron scanner
 #   command: echo "15 14 * * 2 /usr/local/bin/clamav.sh" >> /var/spool/cron/root
 #   become: true
 #   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
+- name: Deleting ClamAV analisis crontab entry
+  shell:
+        "crontab -l -u root |grep -v /usr/local/bin/clamav.sh  |crontab -u root -"
+
 - name: Cron analisis the computer with ClamAV
   ansible.builtin.cron:
     name: "Analises computer with ClamAV "
-    minute: "15"
+    day: "15"
+    minute: "00"
     hour: "14"
     job: "/usr/local/bin/clamav.sh"
 

@@ -1,3 +1,10 @@
+- name: Disable Gnome Wayland session
+  ansible.builtin.replace:
+    path: "/etc/gdm3/custom.conf"
+    regexp: '#WaylandEnable=false'
+    replace: "WaylandEnable=false"
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+    
 - name: Update apt repo and cache on all Debian/Ubuntu boxes
   apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
@@ -34,3 +41,12 @@
 - name: Switch to nvidia GPU 
   shell: prime-select nvidia
   become: true
+
+- name: Search user of machine
+  shell: ls /home
+  register: user_name
+
+- name: Switch to nvidia GPU in the first start 
+  ansible.builtin.cron:
+    name: "Analises computer with ClamAV "
+    job: "touch /home/{{user_name.stdout}}/Desktop/PleaseNOTRestartComputer && prime-select nvidia && rm -f /home/{{user_name.stdout}}/Desktop/PleaseNOTRestartComputer"
