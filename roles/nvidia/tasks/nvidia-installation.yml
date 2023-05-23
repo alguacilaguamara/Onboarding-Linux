@@ -34,7 +34,7 @@
 - name: Install Nvidia driver version 525
   apt: 
       name:
-        - nvidia-driver-525
+        - nvidia-driver-530
       state: latest 
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
