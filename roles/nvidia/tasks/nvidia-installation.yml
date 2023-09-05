@@ -48,5 +48,5 @@
 
 - name: Switch to nvidia GPU in the first start 
   ansible.builtin.cron:
-    name: "Analises computer with ClamAV "
+    name: "Change to nvidia performance mode"
     job: "touch /home/{{user_name.stdout}}/Desktop/PleaseNOTRestartComputer && prime-select nvidia && rm -f /home/{{user_name.stdout}}/Desktop/PleaseNOTRestartComputer"
