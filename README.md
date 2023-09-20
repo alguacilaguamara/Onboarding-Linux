@@ -12,7 +12,7 @@ For example, in Ubuntu 22.04 you can use:
 $ sudo apt install ansible
 ```
 
-For Red Hat derivates (like CentOS, Fedora), you can use:
+For Red Hat based systems (like CentOS, Fedora), you can use:
 
 ```sh
 $ sudo yum install ansible
