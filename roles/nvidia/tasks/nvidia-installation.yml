@@ -31,10 +31,10 @@
   ignore_errors: true
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
-- name: Install Nvidia driver version 545
+- name: Install Nvidia driver version 535
   apt: 
       name:
-        - nvidia-driver-545
+        - nvidia-driver-535
       state: latest 
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
